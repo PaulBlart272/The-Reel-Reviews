@@ -1,0 +1,1098 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Reel Reviews</title>
+
+  <style>
+    :root{
+      --bg: #0b1020;
+      --panel: rgba(255,255,255,0.08);
+      --panel2: rgba(255,255,255,0.12);
+      --text: rgba(255,255,255,0.92);
+      --muted: rgba(255,255,255,0.72);
+      --line: rgba(255,255,255,0.14);
+      --shadow: 0 18px 50px rgba(0,0,0,0.55);
+      --radius: 18px;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body{
+      margin: 0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color: var(--text);
+      background: radial-gradient(1100px 600px at 20% 10%, rgba(99,102,241,0.35), transparent 55%),
+                  radial-gradient(900px 500px at 80% 30%, rgba(34,197,94,0.20), transparent 60%),
+                  radial-gradient(1000px 700px at 60% 90%, rgba(244,63,94,0.20), transparent 60%),
+                  var(--bg);
+      overflow-x: hidden;
+    }
+
+    .container{
+      width: min(1100px, 92vw);
+      margin: 0 auto;
+      padding: 28px 0 60px;
+    }
+
+    header{
+      display: grid;
+      gap: 10px;
+      padding: 18px 18px 0;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap: 10px;
+    }
+    .logo{
+      width: 42px; height: 42px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, rgba(99,102,241,0.95), rgba(244,63,94,0.85));
+      box-shadow: var(--shadow);
+      display:flex; align-items:center; justify-content:center;
+      font-weight: 800;
+    }
+    h1{
+      margin: 0;
+      font-size: 1.5rem;
+      letter-spacing: 0.2px;
+    }
+    .sub{
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+
+    .grid{
+      display: grid;
+      grid-template-columns: 420px 1fr;
+      gap: 16px;
+      align-items: start;
+      margin-top: 14px;
+      padding: 0 18px;
+    }
+
+    .panel{
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+      overflow: hidden;
+    }
+
+    .panel-header{
+      padding: 14px 14px 10px;
+      border-bottom: 1px solid var(--line);
+      background: linear-gradient(180deg, rgba(255,255,255,0.08), transparent);
+    }
+
+    .panel-title{
+      margin: 0;
+      font-size: 1rem;
+      font-weight: 700;
+    }
+    .panel-note{
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    form{
+      padding: 14px;
+      display: grid;
+      gap: 10px;
+    }
+
+    label{
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    input, textarea, select{
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.18);
+      background: rgba(0,0,0,0.28);
+      color: var(--text);
+      outline: none;
+    }
+    input::placeholder, textarea::placeholder{ color: rgba(255,255,255,0.45); }
+    textarea{ min-height: 96px; resize: vertical; }
+
+    .row{
+      display: grid;
+      grid-template-columns: 1fr 130px;
+      gap: 10px;
+    }
+
+    .btns{
+      display:flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 6px;
+    }
+
+    button{
+      border: 0;
+      border-radius: 12px;
+      padding: 10px 12px;
+      cursor: pointer;
+      font-weight: 700;
+      color: var(--text);
+      background: rgba(99,102,241,0.9);
+      box-shadow: 0 12px 30px rgba(0,0,0,0.35);
+    }
+    button.secondary{
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.16);
+      box-shadow: none;
+    }
+    button.danger{
+      background: rgba(244,63,94,0.9);
+    }
+    button:active{ transform: translateY(1px); }
+
+    .controls{
+      padding: 14px;
+      display: grid;
+      gap: 10px;
+      border-top: 1px solid var(--line);
+      background: rgba(255,255,255,0.04);
+    }
+
+    .controls .row2{
+      display: grid;
+      grid-template-columns: 1fr 170px 170px;
+      gap: 10px;
+    }
+
+    .list{
+      display: grid;
+      gap: 12px;
+      padding: 14px;
+    }
+
+    .card{
+      background: var(--panel2);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 12px;
+      display: grid;
+      gap: 8px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card-top{
+      display:flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: start;
+    }
+
+    .movie{
+      margin: 0;
+      font-size: 1.05rem;
+      line-height: 1.25;
+    }
+
+    .meta{
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin-top: 2px;
+    }
+
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap: 6px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.18);
+      background: rgba(0,0,0,0.28);
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .stars{
+      letter-spacing: 1px;
+      font-size: 0.92rem;
+      color: rgba(255,255,255,0.9);
+    }
+
+    .review{
+      margin: 0;
+      color: rgba(255,255,255,0.9);
+      line-height: 1.5;
+      white-space: pre-wrap;
+    }
+
+    .review-with-poster{
+      display: grid;
+      grid-template-columns: 76px 1fr;
+      gap: 10px;
+      align-items: start;
+    }
+    .poster{
+      width: 76px;
+      aspect-ratio: 2 / 3;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.14);
+      overflow: hidden;
+      background: rgba(0,0,0,0.28);
+    }
+    .poster img{
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .card-actions{
+      display:flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .small{
+      font-size: 0.85rem;
+      padding: 8px 10px;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.10);
+      border: 1px solid rgba(255,255,255,0.14);
+      box-shadow: none;
+    }
+    .small.danger{
+      background: rgba(244,63,94,0.18);
+      border: 1px solid rgba(244,63,94,0.28);
+    }
+    .link{
+      color: rgba(255,255,255,0.8);
+      font-size: 0.9rem;
+      text-decoration: none;
+      border-bottom: 1px dashed rgba(255,255,255,0.25);
+    }
+    .link:hover{ color: rgba(255,255,255,0.95); }
+
+    .empty{
+      padding: 28px 14px;
+      text-align: center;
+      color: var(--muted);
+      border: 1px dashed rgba(255,255,255,0.22);
+      border-radius: 16px;
+      background: rgba(0,0,0,0.14);
+    }
+
+    /* Repo results */
+    .repo-results{
+      display: grid;
+      gap: 10px;
+      padding: 14px;
+      border-top: 1px solid var(--line);
+      background: rgba(255,255,255,0.03);
+    }
+    .result{
+      display:grid;
+      grid-template-columns: 56px 1fr auto;
+      gap: 10px;
+      align-items: center;
+      padding: 10px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(0,0,0,0.22);
+    }
+    .result .thumb{
+      width: 56px;
+      aspect-ratio: 2 / 3;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(0,0,0,0.28);
+    }
+    .result .thumb img{ width:100%; height:100%; object-fit:cover; display:block; }
+    .result .title{
+      margin: 0;
+      font-weight: 800;
+      line-height: 1.2;
+    }
+    .result .subline{
+      margin-top: 4px;
+      font-size: 0.9rem;
+      color: var(--muted);
+      line-height: 1.35;
+    }
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap: 6px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.16);
+      background: rgba(255,255,255,0.08);
+      font-weight: 800;
+      white-space: nowrap;
+      box-shadow: none;
+    }
+
+    .inline-note{
+      padding: 10px 14px 0;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    footer{
+      margin-top: 16px;
+      color: rgba(255,255,255,0.55);
+      font-size: 0.9rem;
+      padding: 0 18px;
+      line-height: 1.4;
+    }
+
+    @media (max-width: 980px){
+      .grid{ grid-template-columns: 1fr; }
+      .controls .row2{ grid-template-columns: 1fr; }
+      .row{ grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <header>
+      <div class="brand">
+        <div class="logo">RR</div>
+        <div>
+          <h1>Reel Reviews</h1>
+          <p class="sub">Search Wikidata or browse top films. No token needed.</p>
+        </div>
+      </div>
+    </header>
+
+    <main class="grid">
+      <!-- LEFT: Repository + Add/Edit -->
+      <section class="panel">
+        <div class="panel-header">
+          <p class="panel-title">Movie repository (Wikidata)</p>
+          <p class="panel-note">Search for a movie, click “Use this” to auto-fill your review form.</p>
+        </div>
+
+        <form id="repoForm" autocomplete="off">
+          <div>
+            <label for="repoQuery">Search movies</label>
+            <input id="repoQuery" placeholder="e.g., Inception" />
+          </div>
+
+          <div class="btns">
+            <button type="submit" id="repoSearchBtn">Search Wikidata</button>
+            <button type="button" class="secondary" id="repoClearBtn">Clear search</button>
+          </div>
+
+          <p class="inline-note" id="repoStatus"></p>
+        </form>
+
+        <div class="repo-results" id="repoResults"></div>
+
+        <!-- BROWSE: TOP FILMS -->
+        <div class="panel-header">
+          <p class="panel-title">Browse: Top films</p>
+          <p class="panel-note">Loads popular films based on Wikipedia presence (no token).</p>
+        </div>
+
+        <form id="browseForm" autocomplete="off">
+          <div class="btns">
+            <button type="button" id="browseTopBtn">Load top films</button>
+            <button type="button" class="secondary" id="browseClearBtn">Clear browse</button>
+          </div>
+          <p class="inline-note" id="browseStatus"></p>
+        </form>
+
+        <div class="repo-results" id="browseResults"></div>
+
+        <!-- REVIEW FORM -->
+        <div class="panel-header">
+          <p class="panel-title" id="formTitle">Add a review</p>
+          <p class="panel-note" id="formNote">Fill this out, then hit “Save review”.</p>
+        </div>
+
+        <form id="reviewForm" autocomplete="off">
+          <div>
+            <label for="title">Movie title</label>
+            <input id="title" name="title" placeholder="e.g., The Matrix" required />
+          </div>
+
+          <div class="row">
+            <div>
+              <label for="year">Year</label>
+              <input id="year" name="year" inputmode="numeric" placeholder="1999" />
+            </div>
+            <div>
+              <label for="rating">Rating (0–10)</label>
+              <input id="rating" name="rating" type="number" min="0" max="10" step="0.5" placeholder="8.5" required />
+            </div>
+          </div>
+
+          <div>
+            <label for="review">Your review</label>
+            <textarea id="review" name="review" placeholder="What worked? What didn’t? Who would like it?"></textarea>
+          </div>
+
+          <!-- hidden fields for Wikidata metadata -->
+          <input type="hidden" id="editingId" />
+          <input type="hidden" id="wikidataId" />
+          <input type="hidden" id="imdbId" />
+          <input type="hidden" id="wikipediaUrl" />
+          <input type="hidden" id="imageName" />
+
+          <div class="btns">
+            <button type="submit" id="saveBtn">Save review</button>
+            <button type="button" class="secondary" id="cancelEditBtn" hidden>Cancel edit</button>
+            <button type="button" class="danger" id="clearAllBtn">Clear all</button>
+          </div>
+        </form>
+
+        <div class="controls">
+          <div>
+            <label for="search">Search your reviews</label>
+            <input id="search" placeholder="Search by title or review text…" />
+          </div>
+
+          <div class="row2">
+            <div>
+              <label for="minRating">Min rating</label>
+              <select id="minRating">
+                <option value="0">0+</option>
+                <option value="2">2+</option>
+                <option value="4">4+</option>
+                <option value="6">6+</option>
+                <option value="8">8+</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="sortBy">Sort</label>
+              <select id="sortBy">
+                <option value="newest">Newest</option>
+                <option value="oldest">Oldest</option>
+                <option value="ratingHigh">Rating: High → Low</option>
+                <option value="ratingLow">Rating: Low → High</option>
+                <option value="titleAZ">Title: A → Z</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="demo">Quick add</label>
+              <button type="button" class="secondary" id="demoBtn" style="width:100%;">Add demo reviews</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- RIGHT: YOUR REVIEWS -->
+      <section class="panel">
+        <div class="panel-header">
+          <p class="panel-title">Your reviews</p>
+          <p class="panel-note"><span id="count">0</span> total</p>
+        </div>
+
+        <div class="list" id="list"></div>
+      </section>
+    </main>
+
+    <footer>
+      Data pulled from Wikidata/Wikipedia/Wikimedia Commons. No tokens required.
+    </footer>
+  </div>
+
+<script>
+  /********************
+   * 1) WIKIDATA HELPERS
+   ********************/
+  function commonsFileUrl(imageName){
+    if (!imageName) return "";
+    const clean = imageName.startsWith("File:") ? imageName.slice(5) : imageName;
+    return "https://commons.wikimedia.org/wiki/Special:FilePath/" + encodeURIComponent(clean);
+  }
+
+  function wikidataEntityIdFromUri(uri){
+    if (!uri) return "";
+    const m = String(uri).match(/\/(Q\\d+)\\b/);
+    return m ? m[1] : "";
+  }
+
+  function buildWikidataMovieSearchQuery(searchText, limit = 10){
+    const safe = searchText.replace(/"/g, '\\"');
+    return `
+PREFIX wikibase: <http://wikiba.se/ontology#>
+PREFIX mwapi: <https://www.mediawiki.org/ontology#API/>
+PREFIX bd: <http://www.bigdata.com/rdf#>
+PREFIX schema: <http://schema.org/>
+PREFIX wd: <http://www.wikidata.org/entity/>
+PREFIX wdt: <http://www.wikidata.org/prop/direct/>
+
+SELECT ?item ?itemLabel ?year ?imdb ?wikipedia ?image WHERE {
+  SERVICE wikibase:mwapi {
+    bd:serviceParam wikibase:api "EntitySearch" ;
+                    wikibase:endpoint "www.wikidata.org" ;
+                    mwapi:search "${safe}" ;
+                    mwapi:language "en" ;
+                    mwapi:limit ${limit} .
+    ?item wikibase:apiOutputItem mwapi:item .
+  }
+
+  ?item wdt:P31/wdt:P279* wd:Q11424 .
+
+  OPTIONAL {
+    ?item wdt:P577 ?releaseDate .
+    BIND(YEAR(?releaseDate) AS ?year)
+  }
+
+  OPTIONAL { ?item wdt:P345 ?imdb . }
+  OPTIONAL { ?item wdt:P18 ?image . }
+
+  OPTIONAL {
+    ?wikipedia schema:about ?item ;
+              schema:isPartOf <https://en.wikipedia.org/> .
+  }
+
+  SERVICE wikibase:label { bd:serviceParam wikibase:language "en". }
+}
+`;
+  }
+
+  async function wikidataSearchMovies(query){
+    const sparql = buildWikidataMovieSearchQuery(query, 10);
+    const url = "https://query.wikidata.org/sparql?format=json&query=" + encodeURIComponent(sparql);
+
+    const res = await fetch(url, { headers: { "Accept": "application/sparql-results+json" } });
+    if (!res.ok){
+      const text = await res.text().catch(() => "");
+      throw new Error(`Wikidata error (${res.status}). ${text ? "Details: " + text : ""}`.trim());
+    }
+
+    const data = await res.json();
+    const rows = data?.results?.bindings ?? [];
+
+    return rows.map(b => ({
+      id: wikidataEntityIdFromUri(b.item?.value),
+      label: b.itemLabel?.value ?? "",
+      year: b.year?.value ? String(b.year.value) : "",
+      imdb: b.imdb?.value ?? "",
+      wikipedia: b.wikipedia?.value ?? "",
+      imageName: b.image?.value ?? "",
+    }));
+  }
+
+  function buildWikidataTopFilmsQuery(limit = 20){
+    return `
+PREFIX bd: <http://www.bigdata.com/rdf#>
+PREFIX schema: <http://schema.org/>
+PREFIX wikibase: <http://wikiba.se/ontology#>
+PREFIX wd: <http://www.wikidata.org/entity/>
+PREFIX wdt: <http://www.wikidata.org/prop/direct/>
+
+SELECT ?item ?itemLabel ?year ?imdb ?wikipedia ?image ?sitelinks WHERE {
+  ?item wdt:P31/wdt:P279* wd:Q11424 .
+  ?item wikibase:sitelinks ?sitelinks .
+
+  OPTIONAL {
+    ?item wdt:P577 ?releaseDate .
+    BIND(YEAR(?releaseDate) AS ?year)
+  }
+
+  OPTIONAL { ?item wdt:P345 ?imdb . }
+  OPTIONAL { ?item wdt:P18 ?image . }
+
+  OPTIONAL {
+    ?wikipedia schema:about ?item ;
+              schema:isPartOf <https://en.wikipedia.org/> .
+  }
+
+  SERVICE wikibase:label { bd:serviceParam wikibase:language "en". }
+}
+ORDER BY DESC(?sitelinks)
+LIMIT ${limit}
+`;
+  }
+
+  async function wikidataTopFilms(){
+    const sparql = buildWikidataTopFilmsQuery(20);
+    const url = "https://query.wikidata.org/sparql?format=json&query=" + encodeURIComponent(sparql);
+
+    const res = await fetch(url, { headers: { "Accept": "application/sparql-results+json" } });
+    if (!res.ok){
+      const text = await res.text().catch(() => "");
+      throw new Error(`Wikidata error (${res.status}). ${text ? "Details: " + text : ""}`.trim());
+    }
+
+    const data = await res.json();
+    const rows = data?.results?.bindings ?? [];
+
+    return rows.map(b => ({
+      id: wikidataEntityIdFromUri(b.item?.value),
+      label: b.itemLabel?.value ?? "",
+      year: b.year?.value ? String(b.year.value) : "",
+      imdb: b.imdb?.value ?? "",
+      wikipedia: b.wikipedia?.value ?? "",
+      imageName: b.image?.value ?? "",
+      sitelinks: b.sitelinks?.value ? Number(b.sitelinks.value) : 0,
+    }));
+  }
+
+  /********************
+   * 2) APP STORAGE
+   ********************/
+  const STORAGE_KEY = "reel_reviews_v3_wikidata_browse";
+
+  const els = {
+    // Repo search
+    repoForm: document.getElementById("repoForm"),
+    repoQuery: document.getElementById("repoQuery"),
+    repoResults: document.getElementById("repoResults"),
+    repoStatus: document.getElementById("repoStatus"),
+    repoClearBtn: document.getElementById("repoClearBtn"),
+
+    // Browse
+    browseForm: document.getElementById("browseForm"),
+    browseTopBtn: document.getElementById("browseTopBtn"),
+    browseClearBtn: document.getElementById("browseClearBtn"),
+    browseStatus: document.getElementById("browseStatus"),
+    browseResults: document.getElementById("browseResults"),
+
+    // Reviews
+    form: document.getElementById("reviewForm"),
+    formTitle: document.getElementById("formTitle"),
+    formNote: document.getElementById("formNote"),
+    title: document.getElementById("title"),
+    year: document.getElementById("year"),
+    rating: document.getElementById("rating"),
+    review: document.getElementById("review"),
+    editingId: document.getElementById("editingId"),
+    wikidataId: document.getElementById("wikidataId"),
+    imdbId: document.getElementById("imdbId"),
+    wikipediaUrl: document.getElementById("wikipediaUrl"),
+    imageName: document.getElementById("imageName"),
+    saveBtn: document.getElementById("saveBtn"),
+    cancelEditBtn: document.getElementById("cancelEditBtn"),
+    clearAllBtn: document.getElementById("clearAllBtn"),
+
+    search: document.getElementById("search"),
+    minRating: document.getElementById("minRating"),
+    sortBy: document.getElementById("sortBy"),
+    demoBtn: document.getElementById("demoBtn"),
+
+    list: document.getElementById("list"),
+    count: document.getElementById("count"),
+  };
+
+  function loadReviews(){
+    try{ return JSON.parse(localStorage.getItem(STORAGE_KEY)) ?? []; }
+    catch{ return []; }
+  }
+  function saveReviews(reviews){
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(reviews));
+  }
+  function uid(){
+    return Math.random().toString(16).slice(2) + Date.now().toString(16);
+  }
+  function clampRating(n){
+    if (Number.isNaN(n)) return 0;
+    return Math.max(0, Math.min(10, n));
+  }
+  function starsFromRating(r){
+    const s = Math.round((r / 2) * 2) / 2;
+    const full = Math.floor(s);
+    const half = (s - full) === 0.5;
+    let out = "★".repeat(full);
+    if (half) out += "½";
+    out += "☆".repeat(5 - full - (half ? 1 : 0));
+    return out;
+  }
+  function formatDate(ts){
+    const d = new Date(ts);
+    return d.toLocaleString(undefined, { year: "numeric", month: "short", day: "2-digit" });
+  }
+
+  function setMode(mode){
+    if (mode === "edit"){
+      els.formTitle.textContent = "Edit review";
+      els.formNote.textContent = "Make changes, then hit “Save review”.";
+      els.cancelEditBtn.hidden = false;
+      els.saveBtn.textContent = "Save changes";
+    }else{
+      els.formTitle.textContent = "Add a review";
+      els.formNote.textContent = "Fill this out, then hit “Save review”.";
+      els.cancelEditBtn.hidden = true;
+      els.saveBtn.textContent = "Save review";
+      els.editingId.value = "";
+      els.wikidataId.value = "";
+      els.imdbId.value = "";
+      els.wikipediaUrl.value = "";
+      els.imageName.value = "";
+      els.form.reset();
+      els.rating.value = "";
+    }
+  }
+
+  function getFilteredSorted(){
+    const q = els.search.value.trim().toLowerCase();
+    const min = Number(els.minRating.value);
+    const sort = els.sortBy.value;
+
+    let reviews = loadReviews();
+
+    reviews = reviews.filter(r => {
+      const hay = (r.title + " " + (r.review ?? "")).toLowerCase();
+      return hay.includes(q) && r.rating >= min;
+    });
+
+    const byTitle = (a,b) => a.title.localeCompare(b.title);
+    if (sort === "newest") reviews.sort((a,b) => b.createdAt - a.createdAt);
+    if (sort === "oldest") reviews.sort((a,b) => a.createdAt - b.createdAt);
+    if (sort === "ratingHigh") reviews.sort((a,b) => b.rating - a.rating);
+    if (sort === "ratingLow") reviews.sort((a,b) => a.rating - b.rating);
+    if (sort === "titleAZ") reviews.sort(byTitle);
+
+    return reviews;
+  }
+
+  function render(){
+    const all = loadReviews();
+    const shown = getFilteredSorted();
+    els.count.textContent = all.length;
+
+    els.list.innerHTML = "";
+
+    if (shown.length === 0){
+      const empty = document.createElement("div");
+      empty.className = "empty";
+      empty.textContent = all.length === 0
+        ? "No reviews yet. Add your first one on the left."
+        : "No matching reviews. Try changing search / filters.";
+      els.list.appendChild(empty);
+      return;
+    }
+
+    for (const r of shown){
+      const card = document.createElement("div");
+      card.className = "card";
+
+      const top = document.createElement("div");
+      top.className = "card-top";
+
+      const left = document.createElement("div");
+      const title = document.createElement("h3");
+      title.className = "movie";
+      title.textContent = r.title;
+
+      const meta = document.createElement("div");
+      meta.className = "meta";
+      const yearPart = r.year ? ` • ${r.year}` : "";
+      const repoPart = r.wikidataId ? ` • ${r.wikidataId}` : "";
+      meta.textContent = `Saved ${formatDate(r.createdAt)}${yearPart}${repoPart}`;
+
+      left.appendChild(title);
+      left.appendChild(meta);
+
+      const badge = document.createElement("div");
+      badge.className = "badge";
+      badge.innerHTML = `<span>${r.rating.toFixed(1)}/10</span> <span class="stars">${starsFromRating(r.rating)}</span>`;
+
+      top.appendChild(left);
+      top.appendChild(badge);
+
+      const wrap = document.createElement("div");
+      wrap.className = r.imageName ? "review-with-poster" : "";
+
+      if (r.imageName){
+        const poster = document.createElement("div");
+        poster.className = "poster";
+        const img = document.createElement("img");
+        img.alt = `Poster for ${r.title}`;
+        img.src = commonsFileUrl(r.imageName);
+        poster.appendChild(img);
+        wrap.appendChild(poster);
+      }
+
+      const review = document.createElement("p");
+      review.className = "review";
+      review.textContent = r.review?.trim() ? r.review : "—";
+      wrap.appendChild(review);
+
+      const actions = document.createElement("div");
+      actions.className = "card-actions";
+
+      const editBtn = document.createElement("button");
+      editBtn.className = "small";
+      editBtn.type = "button";
+      editBtn.textContent = "Edit";
+      editBtn.addEventListener("click", () => startEdit(r.id));
+
+      const delBtn = document.createElement("button");
+      delBtn.className = "small danger";
+      delBtn.type = "button";
+      delBtn.textContent = "Delete";
+      delBtn.addEventListener("click", () => deleteReview(r.id));
+
+      actions.appendChild(editBtn);
+      actions.appendChild(delBtn);
+
+      if (r.wikipediaUrl){
+        const a = document.createElement("a");
+        a.className = "link";
+        a.href = r.wikipediaUrl;
+        a.target = "_blank";
+        a.rel = "noreferrer";
+        a.textContent = "Wikipedia";
+        actions.appendChild(a);
+      }
+
+      card.appendChild(top);
+      card.appendChild(wrap);
+      card.appendChild(actions);
+
+      els.list.appendChild(card);
+    }
+  }
+
+  function addOrUpdate(review){
+    const reviews = loadReviews();
+    const idx = reviews.findIndex(r => r.id === review.id);
+    if (idx >= 0) reviews[idx] = review;
+    else reviews.push(review);
+    saveReviews(reviews);
+    render();
+  }
+
+  function startEdit(id){
+    const r = loadReviews().find(x => x.id === id);
+    if (!r) return;
+
+    els.title.value = r.title;
+    els.year.value = r.year ?? "";
+    els.rating.value = r.rating;
+    els.review.value = r.review ?? "";
+    els.editingId.value = r.id;
+
+    els.wikidataId.value = r.wikidataId ?? "";
+    els.imdbId.value = r.imdbId ?? "";
+    els.wikipediaUrl.value = r.wikipediaUrl ?? "";
+    els.imageName.value = r.imageName ?? "";
+
+    setMode("edit");
+    els.title.focus();
+  }
+
+  function deleteReview(id){
+    const next = loadReviews().filter(r => r.id !== id);
+    saveReviews(next);
+    if (els.editingId.value === id) setMode("add");
+    render();
+  }
+
+  function clearAll(){
+    const ok = confirm("Clear ALL reviews? This cannot be undone.");
+    if (!ok) return;
+    localStorage.removeItem(STORAGE_KEY);
+    setMode("add");
+    render();
+  }
+
+  function addDemo(){
+    const now = Date.now();
+    const demo = [
+      { id: uid(), title: "Spirited Away", year: "2001", rating: 9.5,
+        review: "Beautiful, strange, and heartfelt. Every scene feels hand-crafted.",
+        createdAt: now - 1000*60*60*24*9, wikidataId:"", imdbId:"", wikipediaUrl:"", imageName:"" },
+      { id: uid(), title: "Mad Max: Fury Road", year: "2015", rating: 9.0,
+        review: "Relentless pace. Visual storytelling at full volume.",
+        createdAt: now - 1000*60*60*24*4, wikidataId:"", imdbId:"", wikipediaUrl:"", imageName:"" },
+    ];
+    const existing = loadReviews();
+    saveReviews([...existing, ...demo]);
+    render();
+  }
+
+  /********************
+   * 3) REPO UI
+   ********************/
+  function clearRepoResults(){
+    els.repoResults.innerHTML = "";
+    els.repoStatus.textContent = "";
+  }
+  function setRepoStatus(msg){ els.repoStatus.textContent = msg; }
+
+  function pickMovieFromRepo(movie){
+    els.title.value = movie.label || "";
+    els.year.value = movie.year || "";
+    els.wikidataId.value = movie.id || "";
+    els.imdbId.value = movie.imdb || "";
+    els.wikipediaUrl.value = movie.wikipedia || "";
+    els.imageName.value = movie.imageName || "";
+
+    els.rating.focus();
+    setRepoStatus(`Selected: ${movie.label}${movie.year ? " (" + movie.year + ")" : ""}. Now add your rating & review.`);
+  }
+
+  function renderRepoResults(movies, targetEl){
+    targetEl.innerHTML = "";
+
+    if (!movies || movies.length === 0){
+      const empty = document.createElement("div");
+      empty.className = "empty";
+      empty.textContent = "No results. Try again.";
+      targetEl.appendChild(empty);
+      return;
+    }
+
+    for (const m of movies){
+      const row = document.createElement("div");
+      row.className = "result";
+
+      const thumb = document.createElement("div");
+      thumb.className = "thumb";
+      if (m.imageName){
+        const img = document.createElement("img");
+        img.alt = `Poster for ${m.label}`;
+        img.src = commonsFileUrl(m.imageName);
+        thumb.appendChild(img);
+      }
+      row.appendChild(thumb);
+
+      const mid = document.createElement("div");
+      const t = document.createElement("p");
+      t.className = "title";
+      t.textContent = `${m.label}${m.year ? " (" + m.year + ")" : ""}`;
+
+      const s = document.createElement("div");
+      s.className = "subline";
+      const extras = [];
+      if (m.sitelinks) extras.push(`${m.sitelinks} Wikipedia editions`);
+      if (m.id) extras.push(m.id);
+      if (m.imdb) extras.push("IMDb: " + m.imdb);
+      s.textContent = extras.length ? extras.join(" • ") : "No extra IDs available.";
+
+      mid.appendChild(t);
+      mid.appendChild(s);
+      row.appendChild(mid);
+
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "pill";
+      btn.textContent = "Use this";
+      btn.addEventListener("click", () => pickMovieFromRepo(m));
+      row.appendChild(btn);
+
+      targetEl.appendChild(row);
+    }
+  }
+
+  els.repoForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    clearRepoResults();
+
+    const query = els.repoQuery.value.trim();
+    if (!query){
+      setRepoStatus("Type a movie name, then press Search.");
+      return;
+    }
+
+    setRepoStatus("Searching Wikidata…");
+    try{
+      const movies = await wikidataSearchMovies(query);
+      setRepoStatus(`Found ${movies.length} result(s). Click “Use this”.`);
+      renderRepoResults(movies, els.repoResults);
+    }catch(err){
+      setRepoStatus(err?.message || "Wikidata search failed.");
+      const empty = document.createElement("div");
+      empty.className = "empty";
+      empty.textContent = "Could not load results. (Public endpoint may rate-limit—try again soon.)";
+      els.repoResults.appendChild(empty);
+    }
+  });
+
+  els.repoClearBtn.addEventListener("click", clearRepoResults);
+
+  // Browse: Top films
+  function clearBrowse(){
+    els.browseResults.innerHTML = "";
+    els.browseStatus.textContent = "";
+  }
+  function setBrowseStatus(msg){ els.browseStatus.textContent = msg; }
+
+  els.browseTopBtn.addEventListener("click", async () => {
+    clearBrowse();
+    setBrowseStatus("Loading top films from Wikidata…");
+    try{
+      const movies = await wikidataTopFilms();
+      setBrowseStatus(`Loaded ${movies.length} films. Click “Use this”.`);
+      renderRepoResults(movies, els.browseResults);
+    }catch(err){
+      setBrowseStatus(err?.message || "Browse failed.");
+      const empty = document.createElement("div");
+      empty.className = "empty";
+      empty.textContent = "Could not load top films (public endpoint can rate-limit). Try again in a moment.";
+      els.browseResults.appendChild(empty);
+    }
+  });
+
+  els.browseClearBtn.addEventListener("click", clearBrowse);
+
+  /********************
+   * 4) REVIEW FORM EVENTS
+   ********************/
+  els.form.addEventListener("submit", (e) => {
+    e.preventDefault();
+
+    const title = els.title.value.trim();
+    const year = els.year.value.trim();
+    const rating = clampRating(Number(els.rating.value));
+    const reviewText = els.review.value;
+
+    if (!title){ alert("Please add a movie title."); return; }
+    if (els.rating.value === ""){ alert("Please add a rating (0–10)."); return; }
+
+    const editingId = els.editingId.value.trim();
+
+    const wikidataId = els.wikidataId.value.trim();
+    const imdbId = els.imdbId.value.trim();
+    const wikipediaUrl = els.wikipediaUrl.value.trim();
+    const imageName = els.imageName.value.trim();
+
+    if (editingId){
+      const old = loadReviews().find(r => r.id === editingId);
+      if (!old) return;
+
+      addOrUpdate({
+        ...old, title, year, rating, review: reviewText,
+        wikidataId, imdbId, wikipediaUrl, imageName
+      });
+    }else{
+      addOrUpdate({
+        id: uid(), title, year, rating, review: reviewText,
+        wikidataId, imdbId, wikipediaUrl, imageName,
+        createdAt: Date.now(),
+      });
+    }
+
+    setMode("add");
+  });
+
+  els.cancelEditBtn.addEventListener("click", () => setMode("add"));
+  els.clearAllBtn.addEventListener("click", clearAll);
+
+  els.search.addEventListener("input", render);
+  els.minRating.addEventListener("change", render);
+  els.sortBy.addEventListener("change", render);
+  els.demoBtn.addEventListener("click", addDemo);
+
+  // Start
+  setMode("add");
+  render();
+</script>
+</body>
+</html>
