@@ -79,6 +79,34 @@
       display:flex; gap:10px; align-items:center; flex-wrap: wrap;
       justify-content:flex-end;
     }
+    .actions{
+      display:flex;
+      gap:8px;
+      align-items:center;
+      flex-wrap: wrap;
+      justify-content:flex-end;
+    }
+    .more-actions{
+      position: relative;
+    }
+    .more-actions summary{
+      list-style: none;
+      cursor: pointer;
+    }
+    .more-actions summary::-webkit-details-marker{ display:none; }
+    .more-actions .menu{
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .icon-btn{
+      background: none;
+      border: none;
+      font-size: 1.2rem;
+      cursor: pointer;
+      padding: 6px;
+    }
     input, button, select{
       border-radius: 12px;
       border: 1px solid var(--line);
@@ -222,6 +250,26 @@
       .modal-header { flex-direction: column; text-align: center; }
       .status { flex-direction: column; gap: 10px; }
       .row.right { justify-content: center; }
+      .actions { width: 100%; justify-content: center; }
+      .more-actions .menu{
+        display: none;
+        position: absolute;
+        right: 0;
+        top: 40px;
+        z-index: 10;
+        padding: 10px;
+        background: var(--bg);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        box-shadow: var(--shadow);
+        flex-direction: column;
+        align-items: stretch;
+        min-width: 180px;
+      }
+      .more-actions[open] .menu{ display: flex; }
+    }
+    @media (min-width: 769px) {
+      .more-actions summary{ display:none; }
     }
 
     /* Dark mode */
@@ -267,14 +315,22 @@
         </div>
       </div>
 
-      <div class="pill">Reviews: <strong id="count">0 (avg 0.0)</strong></div>
-      <button id="btnClearReviews" class="tag" style="cursor:pointer; margin-left:10px;">Clear Reviews</button>
-      <button id="btnMyReviews" class="tag" style="cursor:pointer; margin-left:5px;">My Reviews</button>
-      <button id="btnStats" class="tag" style="cursor:pointer; margin-left:5px;">📊 Stats</button>
-      <button id="btnExport" class="tag" style="cursor:pointer; margin-left:5px;">📥 Export</button>
-      <button id="btnHelp" class="tag" style="cursor:pointer; margin-left:5px;">?</button>
-      <button id="btnLogout" class="tag" style="cursor:pointer; margin-left:5px;">🚪 Logout</button>
-      <button id="btnTheme" style="margin-left:10px; background:none; border:none; font-size:1.2rem; cursor:pointer;">🌙</button>
+      <div class="actions">
+        <div class="pill">Reviews: <strong id="count">0 (avg 0.0)</strong></div>
+        <button id="btnMyReviews" class="tag" style="cursor:pointer;">My Reviews</button>
+        <details class="more-actions">
+          <summary class="tag">More ▾</summary>
+          <div class="menu">
+            <button id="btnClearReviews" class="tag" style="cursor:pointer;">Clear Reviews</button>
+            <button id="btnStats" class="tag" style="cursor:pointer;">📊 Stats</button>
+            <button id="btnExport" class="tag" style="cursor:pointer;">📥 Export</button>
+            <button id="btnHelp" class="tag" style="cursor:pointer;">?</button>
+            <button id="btnLogout" class="tag" style="cursor:pointer;">🚪 Logout</button>
+            <button id="btnApiKey" class="tag" style="cursor:pointer;">🔑 API Key</button>
+            <button id="btnTheme" class="icon-btn" title="Toggle theme">🌙</button>
+          </div>
+        </details>
+      </div>
     </header>
 
     <main>
@@ -400,9 +456,9 @@
 
   <script>
     // ==========================
-    // 1) TMDB KEY (HARD CODED)
+    // 1) TMDB KEY (LOCAL STORAGE)
     // ==========================
-    const TMDB_KEY = "f3d5a69de29b2aca7f4604239c3bb8f4";
+    const TMDB_KEY_STORAGE = "tmdb_key";
 
     // ==========================
     // 2) BASIC TMDB CONSTANTS
@@ -443,7 +499,9 @@
     const btnExport = document.getElementById("btnExport");
     const btnHelp = document.getElementById("btnHelp");
     const btnLogout = document.getElementById("btnLogout");
+    const btnApiKey = document.getElementById("btnApiKey");
     const genreFilter = document.getElementById("genreFilter");
+    const reviewControls = document.getElementById("reviewControls");
 
     const reviewModal = document.getElementById("reviewModal");
     const reviewTitle = document.getElementById("reviewTitle");
@@ -467,21 +525,56 @@
       btnTrending.setAttribute("aria-pressed", mode === "trending" ? "true" : "false");
     }
 
-    function requireKeyOrDie() {
-      if (!TMDB_KEY || TMDB_KEY.includes("PASTE_YOUR_TMDB_API_KEY_HERE")) {
-        grid.innerHTML = `
-          <div class="muted" style="grid-column: 1 / -1; padding: 10px;">
-            <strong>Missing TMDB API key.</strong><br>
-            Open this file, find <code>TMDB_KEY</code>, and paste your TMDB v3 API key.
+    function getTmdbKey() {
+      return localStorage.getItem(TMDB_KEY_STORAGE) || "";
+    }
+
+    function setTmdbKey(key) {
+      localStorage.setItem(TMDB_KEY_STORAGE, key);
+    }
+
+    function promptForKey() {
+      const existing = getTmdbKey();
+      const key = window.prompt("Enter your TMDB API key", existing);
+      if (key === null) return;
+      const trimmed = key.trim();
+      if (!trimmed) {
+        alert("TMDB API key cannot be empty.");
+        return;
+      }
+      setTmdbKey(trimmed);
+      alert("TMDB API key saved.");
+      if (mode === "top_rated") loadTopRated();
+      else if (mode === "trending") loadTrending();
+      else if (mode === "search" && lastQuery) searchMovies(lastQuery, currentPage);
+    }
+
+    function renderMissingKey() {
+      grid.innerHTML = `
+        <div class="muted" style="grid-column: 1 / -1; padding: 10px;">
+          <strong>Missing TMDB API key.</strong><br>
+          Set your TMDB v3 API key to load movies.
+          <div style="margin-top:10px;">
+            <button id="btnSetKeyInline" class="tag">Set TMDB API Key</button>
           </div>
-        `;
-        subheading.textContent = "Add your TMDB key to load movies.";
+        </div>
+      `;
+      const inlineBtn = document.getElementById("btnSetKeyInline");
+      if (inlineBtn) inlineBtn.addEventListener("click", promptForKey);
+      subheading.textContent = "Add your TMDB key to load movies.";
+    }
+
+    function requireKeyOrDie() {
+      if (!getTmdbKey()) {
+        renderMissingKey();
         return false;
       }
       return true;
     }
 
     async function tmdb(path, params = {}) {
+      const apiKey = getTmdbKey();
+      if (!apiKey) throw new Error("Missing TMDB API key.");
       const cacheKey = 'cache_' + path + JSON.stringify(params);
       const cached = localStorage.getItem(cacheKey);
       if (cached) {
@@ -492,7 +585,7 @@
       }
 
       const url = new URL(TMDB_API + path);
-      url.searchParams.set("api_key", TMDB_KEY);
+      url.searchParams.set("api_key", apiKey);
       url.searchParams.set("language", "en-US");
       for (const [k, v] of Object.entries(params)) url.searchParams.set(k, v);
 
@@ -846,6 +939,22 @@
       reviewControls.style.display = title === "My Reviews" ? 'flex' : 'none';
     }
 
+    function getListCache(key, maxAgeMs) {
+      const raw = localStorage.getItem(key);
+      if (!raw) return null;
+      try {
+        const parsed = JSON.parse(raw);
+        if (Date.now() - parsed.timestamp > maxAgeMs) return null;
+        return parsed.data;
+      } catch {
+        return null;
+      }
+    }
+
+    function setListCache(key, data) {
+      localStorage.setItem(key, JSON.stringify({ data, timestamp: Date.now() }));
+    }
+
     async function loadTopRated() {
       mode = "top_rated";
       setPillStates();
@@ -853,12 +962,27 @@
 
       setStatus({ title: "Top 250 Movies", subtitle: "Highest rated movies on TMDB.", count: 0, page: 1 });
       try {
+        const cacheKey = "list_top_rated_250";
+        const cached = getListCache(cacheKey, 6 * 60 * 60 * 1000);
+        if (cached) {
+          renderMovies(cached);
+          setStatus({
+            title: "Top 250 Movies",
+            subtitle: "Highest rated movies on TMDB.",
+            count: cached.length,
+            page: 1
+          });
+          return;
+        }
+        if (!requireKeyOrDie()) return;
         const allResults = [];
         for (let page = 1; page <= 13; page++) {
           const data = await tmdb("/movie/top_rated", { page });
           allResults.push(...(data.results || []));
         }
-        renderMovies(allResults.slice(0, 250));
+        const list = allResults.slice(0, 250);
+        setListCache(cacheKey, list);
+        renderMovies(list);
         setStatus({
           title: "Top 250 Movies",
           subtitle: "Highest rated movies on TMDB.",
@@ -878,12 +1002,27 @@
 
       setStatus({ title: "Trending Movies", subtitle: "Movies trending this week.", count: 0, page: 1 });
       try {
+        const cacheKey = "list_trending_250";
+        const cached = getListCache(cacheKey, 2 * 60 * 60 * 1000);
+        if (cached) {
+          renderMovies(cached);
+          setStatus({
+            title: "Trending Movies",
+            subtitle: "Movies trending this week.",
+            count: cached.length,
+            page: 1
+          });
+          return;
+        }
+        if (!requireKeyOrDie()) return;
         const allResults = [];
         for (let page = 1; page <= 13; page++) {
           const data = await tmdb("/trending/movie/week", { page });
           allResults.push(...(data.results || []));
         }
-        renderMovies(allResults.slice(0, 250));
+        const list = allResults.slice(0, 250);
+        setListCache(cacheKey, list);
+        renderMovies(list);
         setStatus({
           title: "Trending Movies",
           subtitle: "Movies trending this week.",
@@ -904,6 +1043,7 @@
 
       setStatus({ title: "Search", subtitle: "Loading…", count: 0, page: Math.ceil(apiPage / 2) });
       try {
+        if (!requireKeyOrDie()) return;
         const allResults = [];
         for (let p = apiPage; p <= apiPage + 1; p++) {
           const data = await tmdb("/search/movie", {
@@ -1047,7 +1187,6 @@
     // ==========================
     const sortSelect = document.getElementById('sortSelect');
     const filterSelect = document.getElementById('filterSelect');
-    const reviewControls = document.getElementById('reviewControls');
 
     if (sortSelect) sortSelect.addEventListener('change', (e) => { sortBy = e.target.value; showMyReviews(); });
     if (filterSelect) filterSelect.addEventListener('change', (e) => { filterRating = parseInt(e.target.value); showMyReviews(); });
@@ -1055,6 +1194,7 @@
     if (btnExport) btnExport.addEventListener('click', exportReviews);
     if (btnHelp) btnHelp.addEventListener('click', () => { const hm = document.getElementById('helpModal'); if (hm) hm.style.display = 'flex'; });
     if (btnLogout) btnLogout.addEventListener('click', logout);
+    if (btnApiKey) btnApiKey.addEventListener('click', promptForKey);
 
     // Close modals on X or Cancel
     document.querySelectorAll('.modal').forEach(modal => {
@@ -1067,7 +1207,6 @@
     // START
     // ==========================
     (async function init(){
-      if (!requireKeyOrDie()) return;
       updateReviewCount();
       try {
         await loadTopRated();
