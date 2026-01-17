@@ -499,7 +499,8 @@
     // ==========================
     // 1) TMDB KEY (LOCAL STORAGE)
     // ==========================
-    const TMDB_KEY_STORAGE = "tmdb_key";
+    const TMDB_KEY_STORAGE = "f3d5a69de29b2aca7f4604239c3bb8f4";
+    const TMDB_KEY_PROMPTED = "tmdb_key_prompted";
 
     // ==========================
     // 2) BASIC TMDB CONSTANTS
@@ -606,6 +607,7 @@
         return;
       }
       setTmdbKey(trimmed);
+      localStorage.setItem(TMDB_KEY_PROMPTED, "true");
       updateKeyStatus();
       alert("TMDB API key saved.");
       if (mode === "top_rated") loadTopRated();
@@ -1405,6 +1407,15 @@
     // ==========================
     (async function init(){
       updateKeyStatus();
+      // Auto-set the TMDB key into localStorage on load if missing
+      if (!getTmdbKey()) {
+        setTmdbKey("f3d5a69de29b2aca7f4604239c3bb8f4");
+        updateKeyStatus();
+      }
+      if (!getTmdbKey() && !localStorage.getItem(TMDB_KEY_PROMPTED)) {
+        localStorage.setItem(TMDB_KEY_PROMPTED, "true");
+        promptForKey();
+      }
       updateReviewCount();
       try {
         await loadTopRated();
