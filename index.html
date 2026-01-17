@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>The Reel Reviews (TMDB)</title>
 
+  <!-- Favicon (logo in tab) -->
+  <link rel="icon" type="image/png" href="assets/salmon-vhs-logo.png">
+
   <style>
     :root{
       --bg:#0b1020;
@@ -38,6 +41,39 @@
     }
     h1{ margin:0; font-size: 1.1rem; letter-spacing: 0.4px; }
     .muted{ color: var(--muted); font-size: .92rem; }
+    .sub{ color: var(--muted); font-size: .92rem; }
+
+    /* ===== Logo / brand ===== */
+    .brand{
+      display:flex;
+      align-items:center;
+      gap: 12px;
+      text-decoration:none;
+      color: inherit;
+      min-width: 220px;
+    }
+    .brand-logo{
+      width: 46px;
+      height: 46px;
+      border-radius: 12px;
+      object-fit: cover;
+      box-shadow: 0 12px 34px rgba(0,0,0,0.45);
+      border: 1px solid rgba(255,255,255,0.12);
+      flex: 0 0 auto;
+    }
+    .brand-text{
+      display:flex;
+      flex-direction:column;
+      gap: 2px;
+    }
+    .brand-text h1{ margin:0; }
+
+    /* Slightly smaller logo on small screens */
+    @media (max-width: 520px){
+      .brand{ min-width: 0; }
+      .brand-logo{ width: 40px; height: 40px; border-radius: 11px; }
+      .controls input{ width: 200px; }
+    }
 
     .controls{
       display:flex; gap:10px; align-items:center; flex-wrap: wrap;
@@ -76,6 +112,8 @@
       box-shadow: var(--shadow);
     }
 
+    .search-bar{ margin-bottom: 16px; display:flex; gap:10px; }
+
     .status{ display:flex; justify-content:space-between; align-items:center; gap: 14px; }
     .status strong{ font-weight: 650; }
     .grid{
@@ -83,6 +121,8 @@
       display:grid;
       grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
       gap: 14px;
+      max-height: 600px;
+      overflow-y: auto;
     }
 
     .card{
@@ -96,7 +136,7 @@
       transition: transform .12s ease, background .12s ease;
       cursor: pointer;
     }
-    .card:hover{ transform: translateY(-2px); background: rgba(0,0,0,0.26); }
+    .card:hover{ transform: translateY(-4px); background: rgba(0,0,0,0.26); box-shadow: 0 8px 25px rgba(0,0,0,0.3); }
     .poster{
       width: 100%;
       aspect-ratio: 2/3;
@@ -118,6 +158,7 @@
       color: var(--muted);
       font-size: .86rem;
       white-space: nowrap;
+      cursor:pointer;
     }
 
     .row{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
@@ -139,43 +180,140 @@
     }
     .modal-content{
       background: var(--bg); padding: 20px; border-radius: var(--radius);
-      border: 1px solid var(--line); max-width: 400px; width: 90%;
+      border: 1px solid var(--line); max-width: 600px; width: 90%;
     }
+    .modal-header{ display:flex; gap:15px; align-items:flex-start; }
     .modal h3{ margin-top:0; }
+    .modal input{ width:100%; margin-bottom:12px; padding:10px 12px; border-radius:8px; }
     .modal textarea{ width:100%; height: 80px; resize: vertical; }
     .modal .buttons{ display:flex; gap:10px; justify-content:flex-end; margin-top:10px; }
+
+    /* Welcome card styles */
+    .app {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 16px;
+    }
+    .welcome-card {
+      min-height: auto;
+      cursor: default;
+      text-align: center;
+      padding: 20px;
+      background: rgba(0,0,0,0.1);
+    }
+    .welcome-card h1 {
+      font-size: 2rem;
+      margin-bottom: 10px;
+    }
+    .welcome-card p {
+      font-size: 1.1rem;
+      color: var(--muted);
+    }
+
+    /* Responsive design */
+    @media (max-width: 768px) {
+      .wrap { margin: 10px auto; padding: 10px; }
+      .brand { flex-direction: column; gap: 10px; }
+      .brand-text h1 { font-size: 1rem; }
+      .controls { flex-direction: column; align-items: stretch; }
+      .search-bar { flex-direction: column; }
+      .grid { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; }
+      .modal-content { max-width: 95%; }
+      .modal-header { flex-direction: column; text-align: center; }
+      .status { flex-direction: column; gap: 10px; }
+      .row.right { justify-content: center; }
+    }
+
+    /* Dark mode */
+    .dark {
+      --bg: #0f0f0f;
+      --panel: rgba(255,255,255,0.06);
+      --panel2: rgba(255,255,255,0.1);
+      --text: rgba(255,255,255,0.95);
+      --muted: rgba(255,255,255,0.7);
+      --line: rgba(255,255,255,0.15);
+    }
+    .dark body {
+      background: radial-gradient(1200px 700px at 20% 10%, rgba(59,130,246,0.15), transparent 60%),
+                  radial-gradient(1000px 700px at 80% 30%, rgba(16,185,129,0.12), transparent 55%),
+                  var(--bg);
+    }
   </style>
 </head>
 
 <body>
   <div class="wrap">
     <header>
-      <div>
-        <h1>The Reel Reviews</h1>
-        <div class="muted">Powered by TMDB (Top Rated + Search)</div>
-      </div>
+      <!-- Brand (logo + title) -->
+      <a class="brand" href="./" aria-label="The Reel Reviews home">
+        <img
+          class="brand-logo"
+          src="assets/salmon-vhs-logo.png"
+          alt="Salmon jumping over a VHS tape"
+          width="46"
+          height="46"
+          loading="eager"
+        />
+        <div class="brand-text">
+          <h1>The Reel Reviews</h1>
+          <div class="sub">Search movies (TMDb) → click a result to fill the form → save your review.</div>
+        </div>
+      </a>
 
       <div class="controls">
         <div class="row">
-          <button class="pill" id="btnTopRated" aria-pressed="true" title="Show Top Rated">Top Rated</button>
-          <button class="pill" id="btnTrending" aria-pressed="false" title="Show Trending This Week">Trending</button>
+          <button class="pill" id="btnTopRated" aria-pressed="true" title="Show Top 250 Movies">Top 250</button>
+          <button class="pill" id="btnTrending" aria-pressed="false" title="Show Trending Movies">Trending</button>
         </div>
-
-        <input id="q" type="search" placeholder="Search movies (e.g., Interstellar)" />
-        <button id="btnSearch">Search</button>
-        <button id="btnClear" title="Clear search / reload list">Reset</button>
       </div>
+
+      <div class="pill">Reviews: <strong id="count">0 (avg 0.0)</strong></div>
+      <button id="btnClearReviews" class="tag" style="cursor:pointer; margin-left:10px;">Clear Reviews</button>
+      <button id="btnMyReviews" class="tag" style="cursor:pointer; margin-left:5px;">My Reviews</button>
+      <button id="btnStats" class="tag" style="cursor:pointer; margin-left:5px;">📊 Stats</button>
+      <button id="btnExport" class="tag" style="cursor:pointer; margin-left:5px;">📥 Export</button>
+      <button id="btnHelp" class="tag" style="cursor:pointer; margin-left:5px;">?</button>
+      <button id="btnLogout" class="tag" style="cursor:pointer; margin-left:5px;">🚪 Logout</button>
+      <button id="btnTheme" style="margin-left:10px; background:none; border:none; font-size:1.2rem; cursor:pointer;">🌙</button>
     </header>
 
     <main>
+      <p>Be kind. Rewind. Rate.</p>
+      <div class="search-bar">
+        <input id="q" type="search" placeholder="Search movies (TMDb)" />
+        <button id="btnSearch">Search</button>
+        <div id="genreFilter" style="display:none; gap:8px; flex-wrap:wrap;"></div>
+      </div>
       <div class="status">
         <div>
           <strong id="heading">Top Rated</strong>
           <span class="muted" id="subheading">Loading…</span>
         </div>
         <div class="row right">
+          <button id="btnPrev" class="tag" style="cursor:pointer;">◀ Prev</button>
           <span class="tag" id="countTag">0 results</span>
           <span class="tag" id="pageTag">page 1</span>
+          <button id="btnNext" class="tag" style="cursor:pointer;">Next ▶</button>
+        </div>
+      </div>
+
+      <div id="reviewControls" style="display:none; gap:10px; margin-bottom:10px; flex-wrap:wrap; align-items:center; justify-content:center; width:100%;">
+        <div style="font-size:0.9rem;">Sort: 
+          <select id="sortSelect" style="padding:4px; border-radius:4px;">
+            <option value="date">By Date</option>
+            <option value="rating">By Rating</option>
+            <option value="title">By Title</option>
+          </select>
+        </div>
+        <div style="font-size:0.9rem;">Min Rating:
+          <select id="filterSelect" style="padding:4px; border-radius:4px;">
+            <option value="0">All</option>
+            <option value="5">5+</option>
+            <option value="6">6+</option>
+            <option value="7">7+</option>
+            <option value="8">8+</option>
+            <option value="9">9+</option>
+          </select>
         </div>
       </div>
 
@@ -190,12 +328,72 @@
   <!-- Review Modal -->
   <div id="reviewModal" class="modal" style="display:none;">
     <div class="modal-content">
-      <h3 id="reviewTitle">Review Movie</h3>
+      <div class="modal-header">
+        <img id="reviewPoster" alt="Movie poster" style="width:100px; height:150px; object-fit:cover; border-radius:8px;">
+        <div>
+          <h3 id="reviewTitle">Review Movie</h3>
+          <p id="reviewYear"></p>
+          <p id="tmdbRating" style="font-size:0.85rem; color:var(--primary);"></p>
+          <p id="reviewOverview" style="font-size:0.9rem; color:var(--muted);"></p>
+        </div>
+      </div>
       <label>Rating: <input type="number" id="reviewRating" min="1" max="10" value="5"></label>
       <textarea id="reviewText" placeholder="Write your review..."></textarea>
       <div class="buttons">
         <button id="btnSaveReview">Save</button>
         <button id="btnCancelReview">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Login Modal -->
+  <div id="loginModal" class="modal" style="display:none;">
+    <div class="modal-content">
+      <h3 id="loginTitle">Login to View Reviews</h3>
+      <input id="loginUsername" placeholder="Username" />
+      <input id="loginPassword" type="password" placeholder="Password" />
+      <div class="buttons">
+        <button id="btnLogin">Login</button>
+        <button id="btnCancelLogin">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats Modal -->
+  <div id="statsModal" class="modal" style="display:none;">
+    <div class="modal-content">
+      <h3>Review Statistics</h3>
+      <div id="statsContent"></div>
+      <div class="buttons">
+        <button onclick="document.getElementById('statsModal').style.display='none'">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Help Modal -->
+  <div id="helpModal" class="modal" style="display:none;">
+    <div class="modal-content">
+      <h3>Keyboard Shortcuts & Help</h3>
+      <div style="font-size:0.9rem; line-height:1.8;">
+        <p><strong>/</strong> - Focus search</p>
+        <p><strong>?</strong> - Show this help</p>
+        <p><strong>→</strong> - Next page (search)</p>
+        <p><strong>←</strong> - Previous page (search)</p>
+        <p><strong>F</strong> - Toggle favorite (on movie card)</p>
+      </div>
+      <div class="buttons">
+        <button onclick="document.getElementById('helpModal').style.display='none'">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Comparison Modal -->
+  <div id="comparisonModal" class="modal" style="display:none;">
+    <div class="modal-content">
+      <h3>Movie Comparison</h3>
+      <div id="comparisonContent" style="display:grid; grid-template-columns:1fr 1fr; gap:20px;"></div>
+      <div class="buttons">
+        <button onclick="document.getElementById('comparisonModal').style.display='none'">Close</button>
       </div>
     </div>
   </div>
@@ -214,10 +412,16 @@
     const FALLBACK_POSTER = ""; // you can add your own fallback image url
 
     // App state
-    let mode = "top_rated"; // "top_rated" | "trending" | "search"
+    let mode = "top_rated";
     let currentPage = 1;
     let lastQuery = "";
     let currentMovieForReview = null;
+    let selectedGenres = [];
+    let sortBy = "date"; // "date", "rating", "title"
+    let filterRating = 0; // 0 = no filter
+    let favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+    let watchHistory = JSON.parse(localStorage.getItem('watchHistory') || '[]');
+    let comparisonMovies = [];
 
     // Elements
     const grid = document.getElementById("grid");
@@ -225,19 +429,38 @@
     const subheading = document.getElementById("subheading");
     const countTag = document.getElementById("countTag");
     const pageTag = document.getElementById("pageTag");
-
+    const count = document.getElementById("count");
     const q = document.getElementById("q");
     const btnSearch = document.getElementById("btnSearch");
-    const btnClear = document.getElementById("btnClear");
     const btnTopRated = document.getElementById("btnTopRated");
     const btnTrending = document.getElementById("btnTrending");
+    const btnPrev = document.getElementById("btnPrev");
+    const btnNext = document.getElementById("btnNext");
+    const btnClearReviews = document.getElementById("btnClearReviews");
+    const btnMyReviews = document.getElementById("btnMyReviews");
+    const btnTheme = document.getElementById("btnTheme");
+    const btnStats = document.getElementById("btnStats");
+    const btnExport = document.getElementById("btnExport");
+    const btnHelp = document.getElementById("btnHelp");
+    const btnLogout = document.getElementById("btnLogout");
+    const genreFilter = document.getElementById("genreFilter");
 
     const reviewModal = document.getElementById("reviewModal");
     const reviewTitle = document.getElementById("reviewTitle");
+    const reviewPoster = document.getElementById("reviewPoster");
+    const reviewYear = document.getElementById("reviewYear");
+    const reviewOverview = document.getElementById("reviewOverview");
     const reviewRating = document.getElementById("reviewRating");
     const reviewText = document.getElementById("reviewText");
     const btnSaveReview = document.getElementById("btnSaveReview");
     const btnCancelReview = document.getElementById("btnCancelReview");
+
+    const loginModal = document.getElementById("loginModal");
+    const loginTitle = document.getElementById("loginTitle");
+    const loginUsername = document.getElementById("loginUsername");
+    const loginPassword = document.getElementById("loginPassword");
+    const btnLogin = document.getElementById("btnLogin");
+    const btnCancelLogin = document.getElementById("btnCancelLogin");
 
     function setPillStates() {
       btnTopRated.setAttribute("aria-pressed", mode === "top_rated" ? "true" : "false");
@@ -259,6 +482,15 @@
     }
 
     async function tmdb(path, params = {}) {
+      const cacheKey = 'cache_' + path + JSON.stringify(params);
+      const cached = localStorage.getItem(cacheKey);
+      if (cached) {
+        const { data, timestamp } = JSON.parse(cached);
+        if (Date.now() - timestamp < 3600000) { // 1 hour cache
+          return data;
+        }
+      }
+
       const url = new URL(TMDB_API + path);
       url.searchParams.set("api_key", TMDB_KEY);
       url.searchParams.set("language", "en-US");
@@ -274,7 +506,9 @@
         if (res.status === 429) throw new Error("Rate limit exceeded. Please wait and try again.");
         throw new Error(`TMDB error ${res.status}: ${text || res.statusText}`);
       }
-      return res.json();
+      const data = await res.json();
+      localStorage.setItem(cacheKey, JSON.stringify({ data, timestamp: Date.now() }));
+      return data;
     }
 
     function posterUrl(movie) {
@@ -320,13 +554,104 @@
 
     function setUserReview(movieId, rating, text) {
       const reviews = getUserReviews();
-      reviews[movieId] = { rating: parseInt(rating), text: text.trim(), date: Date.now() };
+      reviews[movieId] = { rating: parseInt(rating), text: text.trim(), date: Date.now(), movie: currentMovieForReview };
       saveUserReviews(reviews);
+      updateReviewCount();
+    }
+
+    function updateReviewCount() {
+      const reviews = getUserReviews();
+      const num = Object.keys(reviews).length;
+      const total = Object.values(reviews).reduce((sum, r) => sum + r.rating, 0);
+      const avg = num ? (total / num).toFixed(1) : 0;
+      count.textContent = `${num} (avg ${avg})`;
+    }
+
+    function showMyReviews() {
+      const reviews = getUserReviews();
+      let reviewList = Object.entries(reviews).map(([id, review]) => ({ movieId: id, ...review }));
+      
+      // Sort
+      if (sortBy === "rating") reviewList.sort((a, b) => b.rating - a.rating);
+      else if (sortBy === "title") reviewList.sort((a, b) => a.movie.title.localeCompare(b.movie.title));
+      else reviewList.sort((a, b) => b.date - a.date);
+      
+      // Filter by rating
+      if (filterRating > 0) reviewList = reviewList.filter(r => r.rating >= filterRating);
+      
+      setStatus({ title: "My Reviews", subtitle: `${reviewList.length} reviews (${sortBy}`, count: reviewList.length, page: 1 });
+      grid.innerHTML = "";
+      if (!reviewList.length) {
+        grid.innerHTML = `<div class="muted" style="grid-column: 1 / -1; padding: 10px;">No reviews yet. Review some movies!</div>`;
+        return;
+      }
+      const frag = document.createDocumentFragment();
+      for (const review of reviewList) {
+        if (!review.movie) continue;
+        const movie = review.movie;
+        const isFav = favorites.includes(parseInt(review.movieId));
+        const card = document.createElement("div");
+        card.className = "card";
+        card.style.position = "relative";
+        
+        const favBtn = document.createElement("div");
+        favBtn.style.position = "absolute";
+        favBtn.style.top = "8px";
+        favBtn.style.right = "8px";
+        favBtn.style.background = "rgba(0,0,0,0.7)";
+        favBtn.style.padding = "4px 8px";
+        favBtn.style.borderRadius = "4px";
+        favBtn.style.cursor = "pointer";
+        favBtn.textContent = isFav ? "❤️" : "🤍";
+        favBtn.addEventListener("click", (e) => { e.stopPropagation(); toggleFavorite(parseInt(review.movieId)); showMyReviews(); });
+        
+        const img = document.createElement("img");
+        img.className = "poster";
+        img.alt = movie.title;
+        img.src = posterUrl(movie);
+        img.addEventListener("click", () => showReviewModal(movie));
+        
+        const body = document.createElement("div");
+        body.className = "card-body";
+        const t = document.createElement("div");
+        t.className = "title";
+        t.textContent = movie.title;
+        const meta = document.createElement("div");
+        meta.className = "meta";
+        meta.innerHTML = `<span>${movieYear(movie)}</span><span>${review.rating}/10</span>`;
+        const reviewText = document.createElement("div");
+        reviewText.style.fontSize = "0.9rem";
+        reviewText.style.marginTop = "8px";
+        reviewText.textContent = review.text || "No text";
+        const delBtn = document.createElement("button");
+        delBtn.style.marginTop = "8px";
+        delBtn.style.padding = "4px 8px";
+        delBtn.style.fontSize = "0.8rem";
+        delBtn.style.cursor = "pointer";
+        delBtn.textContent = "Delete";
+        delBtn.addEventListener("click", () => { if (confirm("Delete this review?")) deleteReview(parseInt(review.movieId)); });
+        
+        body.appendChild(t);
+        body.appendChild(meta);
+        body.appendChild(reviewText);
+        body.appendChild(delBtn);
+        card.appendChild(favBtn);
+        card.appendChild(img);
+        card.appendChild(body);
+        frag.appendChild(card);
+      }
+      grid.appendChild(frag);
     }
 
     function showReviewModal(movie) {
       currentMovieForReview = movie;
-      reviewTitle.textContent = `Review: ${movie.title}`;
+      addToWatchHistory(movie.id);
+      reviewTitle.textContent = movie.title;
+      reviewPoster.src = posterUrl(movie);
+      reviewYear.textContent = movieYear(movie);
+      reviewOverview.textContent = movie.overview || "No overview available.";
+      const tmdbRating = document.getElementById('tmdbRating');
+      if (tmdbRating) tmdbRating.textContent = `TMDB: ${rating(movie)}/10`;
       const existing = getUserReview(movie.id);
       reviewRating.value = existing ? existing.rating : 5;
       reviewText.value = existing ? existing.text : "";
@@ -336,6 +661,131 @@
     function hideReviewModal() {
       reviewModal.style.display = "none";
       currentMovieForReview = null;
+    }
+
+    function addToWatchHistory(movieId) {
+      if (!watchHistory.includes(movieId)) {
+        watchHistory.push(movieId);
+        localStorage.setItem('watchHistory', JSON.stringify(watchHistory));
+      }
+    }
+
+    function toggleFavorite(movieId) {
+      if (favorites.includes(movieId)) {
+        favorites = favorites.filter(id => id !== movieId);
+      } else {
+        favorites.push(movieId);
+      }
+      localStorage.setItem('favorites', JSON.stringify(favorites));
+    }
+
+    function deleteReview(movieId) {
+      const reviews = getUserReviews();
+      delete reviews[movieId];
+      saveUserReviews(reviews);
+      updateReviewCount();
+      showMyReviews();
+    }
+
+    function showStats() {
+      const reviews = getUserReviews();
+      const reviewList = Object.values(reviews);
+      const stats = {
+        total: reviewList.length,
+        avg: reviewList.length ? (reviewList.reduce((s, r) => s + r.rating, 0) / reviewList.length).toFixed(1) : 0,
+        highest: reviewList.length ? Math.max(...reviewList.map(r => r.rating)) : 0,
+        lowest: reviewList.length ? Math.min(...reviewList.map(r => r.rating)) : 0,
+        watched: watchHistory.length,
+        favorites: favorites.length
+      };
+      let dist = [0,0,0,0,0,0,0,0,0,0,0];
+      reviewList.forEach(r => dist[r.rating]++);
+      const html = `
+        <p><strong>Total Reviews:</strong> ${stats.total}</p>
+        <p><strong>Average Rating:</strong> ${stats.avg}/10</p>
+        <p><strong>Highest:</strong> ${stats.highest}/10 | <strong>Lowest:</strong> ${stats.lowest}/10</p>
+        <p><strong>Watched:</strong> ${stats.watched} | <strong>Favorites:</strong> ${stats.favorites}</p>
+        <p><strong>Rating Distribution:</strong> ${dist.map((c,i) => i > 0 ? `${i}★:${c}` : '').filter(Boolean).join(' | ')}</p>
+      `;
+      document.getElementById('statsContent').innerHTML = html;
+      document.getElementById('statsModal').style.display = 'flex';
+    }
+
+    function exportReviews() {
+      const reviews = getUserReviews();
+      const data = {
+        username: localStorage.getItem('username'),
+        exportDate: new Date().toISOString(),
+        reviews: reviews,
+        favorites: favorites,
+        watchHistory: watchHistory
+      };
+      const json = JSON.stringify(data, null, 2);
+      const blob = new Blob([json], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `reviews_${localStorage.getItem('username')}_${new Date().toISOString().split('T')[0]}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function logout() {
+      localStorage.removeItem('loggedIn');
+      q.value = '';
+      loadTopRated();
+      alert('Logged out. Click "My Reviews" to log back in.');
+    }
+
+    function showLoginModal() {
+      const storedUser = localStorage.getItem('username');
+      if (storedUser) {
+        loginTitle.textContent = 'Login to View Reviews';
+      } else {
+        loginTitle.textContent = 'Set Username and Password for Reviews';
+      }
+      loginUsername.value = '';
+      loginPassword.value = '';
+      loginModal.style.display = "flex";
+    }
+
+    function hideLoginModal() {
+      loginModal.style.display = "none";
+    }
+
+    function login() {
+      const user = loginUsername.value.trim();
+      const pass = loginPassword.value;
+      if (!user || !pass) {
+        alert('Enter username and password');
+        return;
+      }
+      const storedUser = localStorage.getItem('username');
+      const storedPass = localStorage.getItem('password');
+      if (storedUser) {
+        if (user === storedUser && pass === storedPass) {
+          localStorage.setItem('loggedIn', 'true');
+          hideLoginModal();
+          showMyReviews();
+        } else {
+          alert('Invalid credentials');
+          loginPassword.value = '';
+        }
+      } else {
+        if (user.length < 3) {
+          alert('Username must be at least 3 characters');
+          return;
+        }
+        if (pass.length < 3) {
+          alert('Password must be at least 3 characters');
+          return;
+        }
+        localStorage.setItem('username', user);
+        localStorage.setItem('password', pass);
+        localStorage.setItem('loggedIn', 'true');
+        hideLoginModal();
+        showMyReviews();
+      }
     }
 
     function renderMovies(list = []) {
@@ -361,7 +811,7 @@
         img.alt = m.title || "Movie poster";
         img.loading = "lazy";
         img.src = posterUrl(m);
-        img.addEventListener("click", () => openTMDB(m.id));
+        img.addEventListener("click", () => showReviewModal(m));
 
         const body = document.createElement("div");
         body.className = "card-body";
@@ -372,21 +822,10 @@
 
         const meta = document.createElement("div");
         meta.className = "meta";
-        const userReview = getUserReview(m.id);
-        const userRating = userReview ? ` (You: ${userReview.rating}/10)` : "";
-        meta.innerHTML = `<span>${movieYear(m)}</span><span>⭐ ${rating(m)}${userRating}</span>`;
-
-        const reviewBtn = document.createElement("button");
-        reviewBtn.className = "tag";
-        reviewBtn.textContent = userReview ? "Edit Review" : "Add Review";
-        reviewBtn.addEventListener("click", (e) => {
-          e.stopPropagation();
-          showReviewModal(m);
-        });
+        meta.innerHTML = `<span>${movieYear(m)}</span><span>⭐ ${rating(m)}</span>`;
 
         body.appendChild(t);
         body.appendChild(meta);
-        body.appendChild(reviewBtn);
 
         card.appendChild(img);
         card.appendChild(body);
@@ -397,77 +836,93 @@
     }
 
     function setStatus({ title, subtitle, count, page }) {
-      heading.textContent = title;
+      let link = '';
+      if (title === "Top 250 Movies") link = ' <a href="https://www.themoviedb.org/movie/top-rated" target="_blank" style="font-size:0.8rem; color:var(--muted);">View on TMDB</a>';
+      else if (title === "Trending Movies") link = ' <a href="https://www.themoviedb.org/trending/movie/week" target="_blank" style="font-size:0.8rem; color:var(--muted);">View on TMDB</a>';
+      heading.innerHTML = title + link;
       subheading.textContent = subtitle;
       countTag.textContent = `${count} result${count === 1 ? "" : "s"}`;
       pageTag.textContent = `page ${page}`;
+      reviewControls.style.display = title === "My Reviews" ? 'flex' : 'none';
     }
 
-    async function loadTopRated(page = 1) {
+    async function loadTopRated() {
       mode = "top_rated";
       setPillStates();
-      currentPage = page;
+      currentPage = 1;
 
-      setStatus({ title: "Top Rated", subtitle: "Loading…", count: 0, page });
+      setStatus({ title: "Top 250 Movies", subtitle: "Highest rated movies on TMDB.", count: 0, page: 1 });
       try {
-        const data = await tmdb("/movie/top_rated", { page });
-        renderMovies(data.results || []);
+        const allResults = [];
+        for (let page = 1; page <= 13; page++) {
+          const data = await tmdb("/movie/top_rated", { page });
+          allResults.push(...(data.results || []));
+        }
+        renderMovies(allResults.slice(0, 250));
         setStatus({
-          title: "Top Rated",
-          subtitle: "Movies with the highest TMDB ratings.",
-          count: (data.results || []).length,
-          page: data.page || page
+          title: "Top 250 Movies",
+          subtitle: "Highest rated movies on TMDB.",
+          count: 250,
+          page: 1
         });
       } catch (err) {
-        setStatus({ title: "Top Rated", subtitle: `Error: ${err.message}`, count: 0, page });
+        setStatus({ title: "Top 250 Movies", subtitle: `Error: ${err.message}`, count: 0, page: 1 });
         renderMovies([]);
       }
     }
 
-    async function loadTrending(page = 1) {
+    async function loadTrending() {
       mode = "trending";
       setPillStates();
-      currentPage = page;
+      currentPage = 1;
 
-      setStatus({ title: "Trending", subtitle: "Loading…", count: 0, page });
+      setStatus({ title: "Trending Movies", subtitle: "Movies trending this week.", count: 0, page: 1 });
       try {
-        const data = await tmdb("/trending/movie/week", { page });
-        renderMovies(data.results || []);
+        const allResults = [];
+        for (let page = 1; page <= 13; page++) {
+          const data = await tmdb("/trending/movie/week", { page });
+          allResults.push(...(data.results || []));
+        }
+        renderMovies(allResults.slice(0, 250));
         setStatus({
-          title: "Trending (This Week)",
-          subtitle: "What people are watching right now.",
-          count: (data.results || []).length,
-          page: data.page || page
+          title: "Trending Movies",
+          subtitle: "Movies trending this week.",
+          count: 250,
+          page: 1
         });
       } catch (err) {
-        setStatus({ title: "Trending", subtitle: `Error: ${err.message}`, count: 0, page });
+        setStatus({ title: "Trending Movies", subtitle: `Error: ${err.message}`, count: 0, page: 1 });
         renderMovies([]);
       }
     }
 
-    async function searchMovies(query, page = 1) {
+    async function searchMovies(query, apiPage = 1) {
       mode = "search";
-      setPillStates(); // pills off
-      currentPage = page;
+      setPillStates();
+      currentPage = apiPage;
       lastQuery = query;
 
-      setStatus({ title: "Search", subtitle: "Loading…", count: 0, page });
+      setStatus({ title: "Search", subtitle: "Loading…", count: 0, page: Math.ceil(apiPage / 2) });
       try {
-        const data = await tmdb("/search/movie", {
-          query,
-          page,
-          include_adult: "false"
-        });
+        const allResults = [];
+        for (let p = apiPage; p <= apiPage + 1; p++) {
+          const data = await tmdb("/search/movie", {
+            query,
+            page: p,
+            include_adult: "false"
+          });
+          allResults.push(...(data.results || []));
+        }
 
-        renderMovies(data.results || []);
+        renderMovies(allResults.slice(0, 25));
         setStatus({
           title: `Search: "${query}"`,
           subtitle: "Results from TMDB search.",
-          count: (data.results || []).length,
-          page: data.page || page
+          count: 25,
+          page: Math.ceil(apiPage / 2)
         });
       } catch (err) {
-        setStatus({ title: "Search", subtitle: `Error: ${err.message}`, count: 0, page });
+        setStatus({ title: "Search", subtitle: `Error: ${err.message}`, count: 0, page: Math.ceil(apiPage / 2) });
         renderMovies([]);
       }
     }
@@ -475,8 +930,8 @@
     // ==========================
     // UI WIRING
     // ==========================
-    btnTopRated.addEventListener("click", () => loadTopRated(1));
-    btnTrending.addEventListener("click", () => loadTrending(1));
+    btnTopRated.addEventListener("click", () => loadTopRated());
+    btnTrending.addEventListener("click", () => loadTrending());
 
     btnSearch.addEventListener("click", () => {
       const query = q.value.trim();
@@ -484,13 +939,53 @@
       searchMovies(query, 1);
     });
 
-    q.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") btnSearch.click();
+    btnPrev.addEventListener("click", () => {
+      if (mode === "search" && currentPage > 1) {
+        const prev = Math.max(1, currentPage - 2);
+        searchMovies(lastQuery, prev);
+      }
     });
 
-    btnClear.addEventListener("click", () => {
-      q.value = "";
-      loadTopRated(1);
+    btnNext.addEventListener("click", () => {
+      if (mode === "search") {
+        const next = currentPage + 2;
+        if (next <= 500) searchMovies(lastQuery, next);
+      }
+    });
+
+    btnClearReviews.addEventListener("click", () => {
+      if (confirm("Clear all reviews?")) {
+        localStorage.removeItem("user_reviews");
+        updateReviewCount();
+        if (mode === "top_rated") loadTopRated();
+        else if (mode === "trending") loadTrending();
+        else if (mode === "search") searchMovies(lastQuery, currentPage);
+      }
+    });
+
+    btnMyReviews.addEventListener("click", () => {
+      if (localStorage.getItem('loggedIn') === 'true') {
+        showMyReviews();
+      } else {
+        showLoginModal();
+      }
+    });
+
+    btnCancelLogin.addEventListener("click", hideLoginModal);
+
+    btnLogin.addEventListener("click", login);
+
+    loginPassword.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") login();
+    });
+
+    btnTheme.addEventListener("click", () => {
+      document.body.classList.toggle("dark");
+      btnTheme.textContent = document.body.classList.contains("dark") ? "☀️" : "🌙";
+    });
+
+    q.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") btnSearch.click();
     });
 
     // Review modal
@@ -501,8 +996,8 @@
       setUserReview(currentMovieForReview.id, rating, text);
       hideReviewModal();
       // Re-render current view
-      if (mode === "top_rated") loadTopRated(currentPage);
-      else if (mode === "trending") loadTrending(currentPage);
+      if (mode === "top_rated") loadTopRated();
+      else if (mode === "trending") loadTrending();
       else if (mode === "search") searchMovies(lastQuery, currentPage);
     });
 
@@ -510,25 +1005,62 @@
 
     // Optional: simple next/prev using keyboard arrows
     window.addEventListener("keydown", async (e) => {
-      if (e.target && (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA")) return;
+      if (e.target && (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA")) {
+        // Allow only "/" and "?" in search
+        if ((e.key === "/" || e.key === "?") && e.target.id !== "q") return;
+        else if (e.key !== "/" && e.key !== "?") return;
+      }
 
-      const maxPage = 500; // TMDB limit
+      // "/" - Focus search
+      if (e.key === "/" || e.key.toLowerCase() === "s") {
+        e.preventDefault();
+        q.focus();
+      }
 
-      if (e.key === "ArrowRight") {
-        const next = currentPage + 1;
-        if (next <= maxPage) {
-          if (mode === "top_rated") await loadTopRated(next);
-          else if (mode === "trending") await loadTrending(next);
-          else if (mode === "search" && lastQuery) await searchMovies(lastQuery, next);
+      // "?" - Show help
+      if (e.key === "?" || (e.key === "/" && e.shiftKey)) {
+        e.preventDefault();
+        const hm = document.getElementById('helpModal');
+        if (hm) hm.style.display = 'flex';
+      }
+
+      // Arrow navigation for search
+      if (mode === "search") {
+        const maxApiPage = 500;
+
+        if (e.key === "ArrowRight") {
+          const next = currentPage + 2;
+          if (next <= maxApiPage) {
+            await searchMovies(lastQuery, next);
+          }
+        }
+
+        if (e.key === "ArrowLeft" && currentPage > 1) {
+          const prev = Math.max(1, currentPage - 2);
+          await searchMovies(lastQuery, prev);
         }
       }
+    });
 
-      if (e.key === "ArrowLeft" && currentPage > 1) {
-        const prev = currentPage - 1;
-        if (mode === "top_rated") await loadTopRated(prev);
-        else if (mode === "trending") await loadTrending(prev);
-        else if (mode === "search" && lastQuery) await searchMovies(lastQuery, prev);
-      }
+    // ==========================
+    // Event Listeners for New Features
+    // ==========================
+    const sortSelect = document.getElementById('sortSelect');
+    const filterSelect = document.getElementById('filterSelect');
+    const reviewControls = document.getElementById('reviewControls');
+
+    if (sortSelect) sortSelect.addEventListener('change', (e) => { sortBy = e.target.value; showMyReviews(); });
+    if (filterSelect) filterSelect.addEventListener('change', (e) => { filterRating = parseInt(e.target.value); showMyReviews(); });
+    if (btnStats) btnStats.addEventListener('click', showStats);
+    if (btnExport) btnExport.addEventListener('click', exportReviews);
+    if (btnHelp) btnHelp.addEventListener('click', () => { const hm = document.getElementById('helpModal'); if (hm) hm.style.display = 'flex'; });
+    if (btnLogout) btnLogout.addEventListener('click', logout);
+
+    // Close modals on X or Cancel
+    document.querySelectorAll('.modal').forEach(modal => {
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) modal.style.display = 'none';
+      });
     });
 
     // ==========================
@@ -536,8 +1068,9 @@
     // ==========================
     (async function init(){
       if (!requireKeyOrDie()) return;
+      updateReviewCount();
       try {
-        await loadTopRated(1);
+        await loadTopRated();
       } catch (err) {
         grid.innerHTML = `
           <div class="muted" style="grid-column: 1 / -1; padding: 10px;">
