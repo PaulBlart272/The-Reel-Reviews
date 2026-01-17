@@ -188,6 +188,38 @@
       white-space: nowrap;
       cursor:pointer;
     }
+    .status-chip{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px dashed var(--line);
+      font-size: .82rem;
+      color: var(--muted);
+      cursor: pointer;
+    }
+    .status-dot{
+      width:8px;
+      height:8px;
+      border-radius:50%;
+      background: #f59e0b;
+      box-shadow: 0 0 8px rgba(245,158,11,0.6);
+    }
+    .status-dot.ok{
+      background: #22c55e;
+      box-shadow: 0 0 8px rgba(34,197,94,0.6);
+    }
+    .banner{
+      display:none;
+      margin: 10px 0;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      background: rgba(0,0,0,0.2);
+      color: var(--muted);
+      font-size: .9rem;
+    }
 
     .row{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
     .right{ margin-left:auto; }
@@ -317,6 +349,10 @@
 
       <div class="actions">
         <div class="pill">Reviews: <strong id="count">0 (avg 0.0)</strong></div>
+        <div class="status-chip" id="keyStatus" title="TMDB key status" role="button" tabindex="0" aria-label="Set TMDB API key">
+          <span class="status-dot" id="keyDot"></span>
+          <span id="keyStatusText">TMDB key not set</span>
+        </div>
         <button id="btnMyReviews" class="tag" style="cursor:pointer;">My Reviews</button>
         <details class="more-actions">
           <summary class="tag">More ▾</summary>
@@ -324,10 +360,11 @@
             <button id="btnClearReviews" class="tag" style="cursor:pointer;">Clear Reviews</button>
             <button id="btnStats" class="tag" style="cursor:pointer;">📊 Stats</button>
             <button id="btnExport" class="tag" style="cursor:pointer;">📥 Export</button>
+            <button id="btnImport" class="tag" style="cursor:pointer;">📤 Import</button>
             <button id="btnHelp" class="tag" style="cursor:pointer;">?</button>
             <button id="btnLogout" class="tag" style="cursor:pointer;">🚪 Logout</button>
             <button id="btnApiKey" class="tag" style="cursor:pointer;">🔑 API Key</button>
-            <button id="btnTheme" class="icon-btn" title="Toggle theme">🌙</button>
+            <button id="btnTheme" class="icon-btn" title="Toggle theme" aria-label="Toggle theme">🌙</button>
           </div>
         </details>
       </div>
@@ -341,6 +378,7 @@
         <div id="genreFilter" style="display:none; gap:8px; flex-wrap:wrap;"></div>
       </div>
       <div class="muted" id="keyHint">TMDB API key is stored locally in this browser.</div>
+      <div class="banner" id="offlineBanner" role="status" aria-live="polite"></div>
       <div class="status">
         <div>
           <strong id="heading">Top Rated</strong>
@@ -383,7 +421,7 @@
   </div>
 
   <!-- Review Modal -->
-  <div id="reviewModal" class="modal" style="display:none;">
+  <div id="reviewModal" class="modal" style="display:none;" role="dialog" aria-modal="true" aria-hidden="true">
     <div class="modal-content">
       <div class="modal-header">
         <img id="reviewPoster" alt="Movie poster" style="width:100px; height:150px; object-fit:cover; border-radius:8px;">
@@ -404,7 +442,7 @@
   </div>
 
   <!-- Login Modal -->
-  <div id="loginModal" class="modal" style="display:none;">
+  <div id="loginModal" class="modal" style="display:none;" role="dialog" aria-modal="true" aria-hidden="true">
     <div class="modal-content">
       <h3 id="loginTitle">Login to View Reviews</h3>
       <input id="loginUsername" placeholder="Username" />
@@ -417,18 +455,18 @@
   </div>
 
   <!-- Stats Modal -->
-  <div id="statsModal" class="modal" style="display:none;">
+  <div id="statsModal" class="modal" style="display:none;" role="dialog" aria-modal="true" aria-hidden="true">
     <div class="modal-content">
       <h3>Review Statistics</h3>
       <div id="statsContent"></div>
       <div class="buttons">
-        <button onclick="document.getElementById('statsModal').style.display='none'">Close</button>
+        <button onclick="closeModal(document.getElementById('statsModal'))">Close</button>
       </div>
     </div>
   </div>
 
   <!-- Help Modal -->
-  <div id="helpModal" class="modal" style="display:none;">
+  <div id="helpModal" class="modal" style="display:none;" role="dialog" aria-modal="true" aria-hidden="true">
     <div class="modal-content">
       <h3>Keyboard Shortcuts & Help</h3>
       <div style="font-size:0.9rem; line-height:1.8;">
@@ -439,21 +477,23 @@
         <p><strong>F</strong> - Toggle favorite (on movie card)</p>
       </div>
       <div class="buttons">
-        <button onclick="document.getElementById('helpModal').style.display='none'">Close</button>
+        <button onclick="closeModal(document.getElementById('helpModal'))">Close</button>
       </div>
     </div>
   </div>
 
   <!-- Comparison Modal -->
-  <div id="comparisonModal" class="modal" style="display:none;">
+  <div id="comparisonModal" class="modal" style="display:none;" role="dialog" aria-modal="true" aria-hidden="true">
     <div class="modal-content">
       <h3>Movie Comparison</h3>
       <div id="comparisonContent" style="display:grid; grid-template-columns:1fr 1fr; gap:20px;"></div>
       <div class="buttons">
-        <button onclick="document.getElementById('comparisonModal').style.display='none'">Close</button>
+        <button onclick="closeModal(document.getElementById('comparisonModal'))">Close</button>
       </div>
     </div>
   </div>
+
+  <input id="importFile" type="file" accept="application/json" style="display:none;">
 
   <script>
     // ==========================
@@ -465,7 +505,8 @@
     // 2) BASIC TMDB CONSTANTS
     // ==========================
     const TMDB_API = "https://api.themoviedb.org/3";
-    const IMG_BASE = "https://image.tmdb.org/t/p/w500"; // posters
+    const IMG_BASE = "https://image.tmdb.org/t/p/w342"; // grid posters
+    const IMG_BASE_LARGE = "https://image.tmdb.org/t/p/w500"; // modal posters
     const FALLBACK_POSTER = ""; // you can add your own fallback image url
 
     // App state
@@ -501,8 +542,14 @@
     const btnHelp = document.getElementById("btnHelp");
     const btnLogout = document.getElementById("btnLogout");
     const btnApiKey = document.getElementById("btnApiKey");
+    const btnImport = document.getElementById("btnImport");
     const genreFilter = document.getElementById("genreFilter");
     const reviewControls = document.getElementById("reviewControls");
+    const keyStatus = document.getElementById("keyStatus");
+    const keyStatusText = document.getElementById("keyStatusText");
+    const keyDot = document.getElementById("keyDot");
+    const offlineBanner = document.getElementById("offlineBanner");
+    const importFile = document.getElementById("importFile");
 
     const reviewModal = document.getElementById("reviewModal");
     const reviewTitle = document.getElementById("reviewTitle");
@@ -534,6 +581,21 @@
       localStorage.setItem(TMDB_KEY_STORAGE, key);
     }
 
+    function updateKeyStatus() {
+      const hasKey = !!getTmdbKey();
+      if (keyStatusText) keyStatusText.textContent = hasKey ? "TMDB key set" : "TMDB key not set";
+      if (keyDot) keyDot.classList.toggle("ok", hasKey);
+    }
+
+    function showOfflineBanner(message) {
+      if (!offlineBanner) return;
+      offlineBanner.textContent = message;
+      offlineBanner.style.display = "block";
+      setTimeout(() => {
+        offlineBanner.style.display = "none";
+      }, 5000);
+    }
+
     function promptForKey() {
       const existing = getTmdbKey();
       const key = window.prompt("Enter your TMDB API key", existing);
@@ -544,6 +606,7 @@
         return;
       }
       setTmdbKey(trimmed);
+      updateKeyStatus();
       alert("TMDB API key saved.");
       if (mode === "top_rated") loadTopRated();
       else if (mode === "trending") loadTrending();
@@ -563,9 +626,11 @@
       const inlineBtn = document.getElementById("btnSetKeyInline");
       if (inlineBtn) inlineBtn.addEventListener("click", promptForKey);
       subheading.textContent = "Add your TMDB key to load movies.";
+      updateKeyStatus();
     }
 
     function requireKeyOrDie() {
+      updateKeyStatus();
       if (!getTmdbKey()) {
         renderMissingKey();
         return false;
@@ -605,8 +670,10 @@
       return data;
     }
 
-    function posterUrl(movie) {
-      if (movie.poster_path) return IMG_BASE + movie.poster_path;
+    function posterUrl(movie, size = "grid") {
+      if (movie.poster_path) {
+        return (size === "large" ? IMG_BASE_LARGE : IMG_BASE) + movie.poster_path;
+      }
       return FALLBACK_POSTER || "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(`
         <svg xmlns="http://www.w3.org/2000/svg" width="400" height="600">
           <rect width="100%" height="100%" fill="rgba(255,255,255,0.06)"/>
@@ -673,7 +740,7 @@
       // Filter by rating
       if (filterRating > 0) reviewList = reviewList.filter(r => r.rating >= filterRating);
       
-      setStatus({ title: "My Reviews", subtitle: `${reviewList.length} reviews (${sortBy}`, count: reviewList.length, page: 1 });
+      setStatus({ title: "My Reviews", subtitle: `${reviewList.length} reviews (${sortBy})`, count: reviewList.length, page: 1 });
       grid.innerHTML = "";
       if (!reviewList.length) {
         grid.innerHTML = `<div class="muted" style="grid-column: 1 / -1; padding: 10px;">No reviews yet. Review some movies!</div>`;
@@ -702,7 +769,7 @@
         const img = document.createElement("img");
         img.className = "poster";
         img.alt = movie.title;
-        img.src = posterUrl(movie);
+        img.src = posterUrl(movie, "grid");
         img.addEventListener("click", () => showReviewModal(movie));
         
         const body = document.createElement("div");
@@ -717,6 +784,24 @@
         reviewText.style.fontSize = "0.9rem";
         reviewText.style.marginTop = "8px";
         reviewText.textContent = review.text || "No text";
+        reviewText.setAttribute("data-collapsed", "true");
+        reviewText.style.maxHeight = "44px";
+        reviewText.style.overflow = "hidden";
+        reviewText.style.transition = "max-height .2s ease";
+        reviewText.style.cursor = "pointer";
+        reviewText.title = "Click to expand";
+
+        const editBtn = document.createElement("button");
+        editBtn.style.marginTop = "8px";
+        editBtn.style.padding = "4px 8px";
+        editBtn.style.fontSize = "0.8rem";
+        editBtn.style.cursor = "pointer";
+        editBtn.textContent = "Edit";
+        editBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          showReviewModal(movie);
+        });
+
         const delBtn = document.createElement("button");
         delBtn.style.marginTop = "8px";
         delBtn.style.padding = "4px 8px";
@@ -724,10 +809,18 @@
         delBtn.style.cursor = "pointer";
         delBtn.textContent = "Delete";
         delBtn.addEventListener("click", () => { if (confirm("Delete this review?")) deleteReview(parseInt(review.movieId)); });
+
+        reviewText.addEventListener("click", () => {
+          const collapsed = reviewText.getAttribute("data-collapsed") === "true";
+          reviewText.setAttribute("data-collapsed", collapsed ? "false" : "true");
+          reviewText.style.maxHeight = collapsed ? "200px" : "44px";
+          reviewText.title = collapsed ? "Click to collapse" : "Click to expand";
+        });
         
         body.appendChild(t);
         body.appendChild(meta);
         body.appendChild(reviewText);
+        body.appendChild(editBtn);
         body.appendChild(delBtn);
         card.appendChild(favBtn);
         card.appendChild(img);
@@ -741,7 +834,7 @@
       currentMovieForReview = movie;
       addToWatchHistory(movie.id);
       reviewTitle.textContent = movie.title;
-      reviewPoster.src = posterUrl(movie);
+      reviewPoster.src = posterUrl(movie, "large");
       reviewYear.textContent = movieYear(movie);
       reviewOverview.textContent = movie.overview || "No overview available.";
       const tmdbRating = document.getElementById('tmdbRating');
@@ -749,11 +842,11 @@
       const existing = getUserReview(movie.id);
       reviewRating.value = existing ? existing.rating : 5;
       reviewText.value = existing ? existing.text : "";
-      reviewModal.style.display = "flex";
+      openModal(reviewModal);
     }
 
     function hideReviewModal() {
-      reviewModal.style.display = "none";
+      closeModal(reviewModal);
       currentMovieForReview = null;
     }
 
@@ -802,7 +895,7 @@
         <p><strong>Rating Distribution:</strong> ${dist.map((c,i) => i > 0 ? `${i}★:${c}` : '').filter(Boolean).join(' | ')}</p>
       `;
       document.getElementById('statsContent').innerHTML = html;
-      document.getElementById('statsModal').style.display = 'flex';
+      openModal(document.getElementById('statsModal'));
     }
 
     function exportReviews() {
@@ -824,6 +917,36 @@
       URL.revokeObjectURL(url);
     }
 
+    function importReviewsFromFile(file) {
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const data = JSON.parse(reader.result);
+          if (!data || typeof data !== "object" || !data.reviews || typeof data.reviews !== "object") {
+            alert("Invalid file format.");
+            return;
+          }
+          const confirmReplace = confirm("Replace current reviews with imported data?");
+          if (!confirmReplace) return;
+          localStorage.setItem("user_reviews", JSON.stringify(data.reviews));
+          favorites = Array.isArray(data.favorites) ? data.favorites : [];
+          watchHistory = Array.isArray(data.watchHistory) ? data.watchHistory : [];
+          localStorage.setItem("favorites", JSON.stringify(favorites));
+          localStorage.setItem("watchHistory", JSON.stringify(watchHistory));
+          if (data.username) localStorage.setItem("username", data.username);
+          updateReviewCount();
+          if (localStorage.getItem('loggedIn') === 'true') {
+            showMyReviews();
+          }
+          alert("Import complete.");
+        } catch (e) {
+          alert("Failed to import: invalid JSON.");
+        }
+      };
+      reader.readAsText(file);
+    }
+
     function logout() {
       localStorage.removeItem('loggedIn');
       q.value = '';
@@ -840,11 +963,11 @@
       }
       loginUsername.value = '';
       loginPassword.value = '';
-      loginModal.style.display = "flex";
+      openModal(loginModal);
     }
 
     function hideLoginModal() {
-      loginModal.style.display = "none";
+      closeModal(loginModal);
     }
 
     function login() {
@@ -904,7 +1027,7 @@
         img.className = "poster";
         img.alt = m.title || "Movie poster";
         img.loading = "lazy";
-        img.src = posterUrl(m);
+        img.src = posterUrl(m, "grid");
         img.addEventListener("click", () => showReviewModal(m));
 
         const body = document.createElement("div");
@@ -960,6 +1083,7 @@
       mode = "top_rated";
       setPillStates();
       currentPage = 1;
+      updateKeyStatus();
 
       setStatus({ title: "Top 250 Movies", subtitle: "Highest rated movies on TMDB.", count: 0, page: 1 });
       try {
@@ -984,6 +1108,7 @@
         const list = allResults.slice(0, 250);
         setListCache(cacheKey, list);
         renderMovies(list);
+        if (offlineBanner) offlineBanner.style.display = "none";
         setStatus({
           title: "Top 250 Movies",
           subtitle: "Highest rated movies on TMDB.",
@@ -992,7 +1117,13 @@
         });
       } catch (err) {
         setStatus({ title: "Top 250 Movies", subtitle: `Error: ${err.message}`, count: 0, page: 1 });
-        renderMovies([]);
+        const cached = getListCache("list_top_rated_250", 24 * 60 * 60 * 1000);
+        if (cached && cached.length) {
+          renderMovies(cached);
+          showOfflineBanner("Using cached Top 250 results.");
+        } else {
+          renderMovies([]);
+        }
       }
     }
 
@@ -1000,6 +1131,7 @@
       mode = "trending";
       setPillStates();
       currentPage = 1;
+      updateKeyStatus();
 
       setStatus({ title: "Trending Movies", subtitle: "Movies trending this week.", count: 0, page: 1 });
       try {
@@ -1024,6 +1156,7 @@
         const list = allResults.slice(0, 250);
         setListCache(cacheKey, list);
         renderMovies(list);
+        if (offlineBanner) offlineBanner.style.display = "none";
         setStatus({
           title: "Trending Movies",
           subtitle: "Movies trending this week.",
@@ -1032,7 +1165,13 @@
         });
       } catch (err) {
         setStatus({ title: "Trending Movies", subtitle: `Error: ${err.message}`, count: 0, page: 1 });
-        renderMovies([]);
+        const cached = getListCache("list_trending_250", 24 * 60 * 60 * 1000);
+        if (cached && cached.length) {
+          renderMovies(cached);
+          showOfflineBanner("Using cached trending results.");
+        } else {
+          renderMovies([]);
+        }
       }
     }
 
@@ -1041,6 +1180,7 @@
       setPillStates();
       currentPage = apiPage;
       lastQuery = query;
+      updateKeyStatus();
 
       setStatus({ title: "Search", subtitle: "Loading…", count: 0, page: Math.ceil(apiPage / 2) });
       try {
@@ -1056,6 +1196,7 @@
         }
 
         renderMovies(allResults.slice(0, 25));
+        if (offlineBanner) offlineBanner.style.display = "none";
         setStatus({
           title: `Search: "${query}"`,
           subtitle: "Results from TMDB search.",
@@ -1125,6 +1266,14 @@
       btnTheme.textContent = document.body.classList.contains("dark") ? "☀️" : "🌙";
     });
 
+    if (keyStatus) keyStatus.addEventListener("click", promptForKey);
+    if (keyStatus) keyStatus.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        promptForKey();
+      }
+    });
+
     q.addEventListener("keydown", (e) => {
       if (e.key === "Enter") btnSearch.click();
     });
@@ -1162,7 +1311,7 @@
       if (e.key === "?" || (e.key === "/" && e.shiftKey)) {
         e.preventDefault();
         const hm = document.getElementById('helpModal');
-        if (hm) hm.style.display = 'flex';
+        if (hm) openModal(hm);
       }
 
       // Arrow navigation for search
@@ -1193,21 +1342,69 @@
     if (filterSelect) filterSelect.addEventListener('change', (e) => { filterRating = parseInt(e.target.value); showMyReviews(); });
     if (btnStats) btnStats.addEventListener('click', showStats);
     if (btnExport) btnExport.addEventListener('click', exportReviews);
-    if (btnHelp) btnHelp.addEventListener('click', () => { const hm = document.getElementById('helpModal'); if (hm) hm.style.display = 'flex'; });
+    if (btnHelp) btnHelp.addEventListener('click', () => { const hm = document.getElementById('helpModal'); if (hm) openModal(hm); });
     if (btnLogout) btnLogout.addEventListener('click', logout);
     if (btnApiKey) btnApiKey.addEventListener('click', promptForKey);
+    if (btnImport) btnImport.addEventListener('click', () => { if (importFile) importFile.click(); });
+    if (importFile) importFile.addEventListener('change', (e) => {
+      importReviewsFromFile(e.target.files[0]);
+      e.target.value = "";
+    });
 
-    // Close modals on X or Cancel
+    function trapFocus(modal) {
+      const focusable = modal.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (first) first.focus();
+      if (modal.dataset.trap === "true") return;
+      modal.dataset.trap = "true";
+      modal.addEventListener('keydown', (e) => {
+        if (e.key === 'Tab' && first && last) {
+          if (e.shiftKey && document.activeElement === first) {
+            e.preventDefault();
+            last.focus();
+          } else if (!e.shiftKey && document.activeElement === last) {
+            e.preventDefault();
+            first.focus();
+          }
+        }
+      });
+    }
+
+    function openModal(modal) {
+      if (!modal) return;
+      modal.style.display = 'flex';
+      modal.setAttribute('aria-hidden', 'false');
+      trapFocus(modal);
+    }
+
+    function closeModal(modal) {
+      if (!modal) return;
+      modal.style.display = 'none';
+      modal.setAttribute('aria-hidden', 'true');
+    }
+
+    window.closeModal = closeModal;
+
     document.querySelectorAll('.modal').forEach(modal => {
       modal.addEventListener('click', (e) => {
-        if (e.target === modal) modal.style.display = 'none';
+        if (e.target === modal) closeModal(modal);
       });
+    });
+
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
+        document.querySelectorAll(".modal").forEach((modal) => {
+          if (modal.style.display === "flex") closeModal(modal);
+        });
+      }
     });
 
     // ==========================
     // START
     // ==========================
     (async function init(){
+      updateKeyStatus();
       updateReviewCount();
       try {
         await loadTopRated();
